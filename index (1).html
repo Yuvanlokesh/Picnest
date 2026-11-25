@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICNEST | Little moments, beautifully printed</title>
+<meta name="description" content="Personalised photo prints, fridge magnets, Polaroids and live event photo experiences by PICNEST.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#30251f;--cream:#fbf7f1;--rose:#c87970;--gold:#c49a5a}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:'DM Sans',sans-serif}
+.serif{font-family:'Playfair Display',serif}.btn{background:var(--ink);color:white;border-radius:999px;padding:12px 20px;font-weight:700;transition:.2s}.btn:hover{background:#654b3c;transform:translateY(-1px)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.soft{background:#f1e7dc}.card{background:white;border:1px solid #eee4da;border-radius:22px;overflow:hidden;box-shadow:0 8px 30px #39271a0a}
+input,textarea,select{width:100%;border:1px solid #e5d9ce;border-radius:12px;padding:12px;background:#fff;color:#30251f;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--rose);box-shadow:0 0 0 3px #c8797020}
+.pill{border:1px solid #e5d9ce;border-radius:999px;padding:9px 15px;font-size:13px;white-space:nowrap}.pill.active{background:var(--ink);color:white;border-color:var(--ink)}
+.modal{position:fixed;inset:0;background:#1e1713a6;display:none;align-items:center;justify-content:center;padding:14px;z-index:50}.modal.show{display:flex}.modalbox{background:var(--cream);border-radius:24px;width:min(720px,100%);max-height:92vh;overflow:auto;padding:22px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#30251f;color:white;padding:12px 18px;border-radius:999px;z-index:90;display:none;max-width:90%;text-align:center}
+.photo-thumb{width:68px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5d9ce}
+</style>
+</head>
+<body>
+<header class="sticky top-0 z-40 bg-[#fbf7f1ee] backdrop-blur border-b border-[#eee4da]">
+  <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3"><span class="w-10 h-10 rounded-full bg-[#30251f] text-white grid place-items-center serif text-xl">P</span><span><b class="serif text-2xl tracking-wide">PICNEST</b><small class="block text-[9px] tracking-[.25em] -mt-1">KEEP YOUR MOMENTS CLOSE</small></span></a>
+    <nav class="hidden md:flex items-center gap-7 text-sm"><a href="#shop">Shop</a><a href="#how">How it works</a><a href="#events">Events</a><a href="#contact">Contact</a></nav>
+    <button class="btn text-sm" onclick="openCart()">Cart <span id="cart-count" class="ml-1">0</span></button>
+  </div>
+</header>
+
+<section class="max-w-7xl mx-auto px-5 py-14 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+  <div><p class="uppercase tracking-[.25em] text-xs text-[#b47b66] font-bold mb-5">Your memories, made tangible</p>
+    <h1 class="serif text-5xl md:text-7xl leading-[1.08]">Little moments.<br><i class="text-[#c87970]">Beautifully</i> printed.</h1>
+    <p class="mt-6 text-[#78685e] leading-7 max-w-lg">Turn your favourite photographs into keepsakes you can hold, display and gift. Made with care by PICNEST.</p>
+    <div class="mt-8 flex gap-3 flex-wrap"><a class="btn" href="#shop">Explore the collection</a><a href="#events" class="rounded-full border border-[#d9c9bb] px-5 py-3 font-semibold">Book an event booth</a></div>
+  </div>
+  <div class="relative"><img class="w-full h-[390px] md:h-[490px] object-cover rounded-[34px]" src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=85" onerror="this.src='https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ea?auto=format&fit=crop&w=1200&q=85'" alt="Printed photographs and memories"><div class="absolute -bottom-5 -left-3 md:left-8 bg-white p-4 rounded-2xl shadow-lg"><span class="serif text-xl">Made for your memories</span><p class="text-xs text-[#8a786b] mt-1">Personalised • Thoughtful • Timeless</p></div></div>
+</section>
+
+<section id="shop" class="max-w-7xl mx-auto px-5 py-16">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-8"><div><p class="text-xs uppercase tracking-[.2em] text-[#b47b66] font-bold">The PICNEST collection</p><h2 class="serif text-4xl mt-2">Find your favourite</h2></div><p class="text-sm text-[#87766a]">Thoughtful prints for everyday moments.</p></div>
+  <div id="categories" class="flex gap-2 overflow-x-auto pb-4 mb-5">
+    <button class="pill active" data-cat="all">All products</button><button class="pill" data-cat="magnets">Fridge Magnets</button><button class="pill" data-cat="prints">Photo Prints</button><button class="pill" data-cat="events">Live Events</button><button class="pill" data-cat="polaroids">Polaroid Prints</button>
+  </div>
+  <div id="product-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5"><div class="col-span-full text-center py-12 text-[#8a786b]">Loading PICNEST collection…</div></div>
+  <p id="catalog-note" class="text-xs text-[#9a887b] mt-5"></p>
+</section>
+
+<section id="how" class="soft py-16"><div class="max-w-7xl mx-auto px-5"><div class="text-center mb-10"><p class="text-xs uppercase tracking-[.2em] text-[#b47b66] font-bold">Simple as a memory</p><h2 class="serif text-4xl mt-2">How it works</h2></div><div class="grid md:grid-cols-3 gap-5">
+  <div class="bg-white rounded-2xl p-7"><span class="serif text-3xl text-[#c87970]">01</span><h3 class="font-bold mt-4">Choose your keepsake</h3><p class="text-sm text-[#87766a] mt-2 leading-6">Select a product, quantity and any customisation details.</p></div>
+  <div class="bg-white rounded-2xl p-7"><span class="serif text-3xl text-[#c87970]">02</span><h3 class="font-bold mt-4">Upload your photos</h3><p class="text-sm text-[#87766a] mt-2 leading-6">Add the photographs you want us to turn into something special.</p></div>
+  <div class="bg-white rounded-2xl p-7"><span class="serif text-3xl text-[#c87970]">03</span><h3 class="font-bold mt-4">Confirm on WhatsApp</h3><p class="text-sm text-[#87766a] mt-2 leading-6">Place your order. We will share payment details and confirm the next steps.</p></div>
+</div></div></section>
+
+<section id="events" class="max-w-7xl mx-auto px-5 py-16 grid md:grid-cols-2 gap-10 items-center">
+  <div><p class="text-xs uppercase tracking-[.2em] text-[#b47b66] font-bold">Make your celebration memorable</p><h2 class="serif text-4xl mt-3">A little photo magic at your event.</h2><p class="text-[#87766a] leading-7 mt-5">Bring PICNEST to your wedding, birthday, corporate gathering or special celebration. Enquire about live photo magnets and our instant photo printing booth.</p><img class="w-full h-56 object-cover rounded-3xl mt-7" src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000&q=85" alt="Celebration event"></div>
+  <form id="event-form" class="card p-7 space-y-4"><h3 class="serif text-2xl">Event enquiry</h3><p class="text-sm text-[#87766a]">Tell us a little about your event and we will get in touch.</p>
+    <input name="name" placeholder="Your name" required><input name="phone" placeholder="WhatsApp mobile number" required>
+    <select name="event_type" required><option value="">Select event type</option><option>Wedding</option><option>Birthday</option><option>Corporate event</option><option>College / School event</option><option>Other celebration</option></select>
+    <input name="event_date" type="date"><input name="city_venue" placeholder="City and venue">
+    <textarea name="notes" rows="3" placeholder="Expected guests, service required, or any details"></textarea>
+    <button class="btn w-full" type="submit">Send event enquiry</button>
+  </form>
+</section>
+
+<section id="contact" class="bg-[#30251f] text-white py-12"><div class="max-w-7xl mx-auto px-5 flex flex-col md:flex-row justify-between gap-6"><div><div class="serif text-3xl">PICNEST</div><p class="text-sm text-[#d4c5b8] mt-2">Keep your moments close.</p></div><div class="text-sm text-[#d4c5b8]"><p>Questions or custom orders?</p><a class="underline text-white" href="https://wa.me/918681801077" target="_blank" rel="noopener">Chat with PICNEST on WhatsApp</a></div><p class="text-xs text-[#b9a99c]">© <span id="year"></span> PICNEST. Made with care.</p></div></section>
+
+<!-- Product customisation -->
+<div id="product-modal" class="modal" onclick="if(event.target===this)closeProduct()"><div class="modalbox">
+  <div class="flex justify-between items-start gap-4"><div><p class="text-xs uppercase tracking-widest text-[#b47b66]">Make it yours</p><h3 id="modal-title" class="serif text-3xl mt-1"></h3></div><button onclick="closeProduct()" class="text-2xl px-2">×</button></div>
+  <p id="modal-desc" class="text-sm text-[#87766a] mt-2"></p><div class="grid md:grid-cols-2 gap-5 mt-6">
+    <div><label class="text-sm font-semibold">Quantity</label><input id="modal-qty" type="number" min="1" value="1" class="mt-2"></div>
+    <div><label class="text-sm font-semibold">Customisation / size / finish</label><input id="modal-notes" class="mt-2" placeholder="E.g. 3x3 inch, glossy finish"></div>
+  </div>
+  <div class="mt-5"><label class="text-sm font-semibold">Upload your photos</label><input id="modal-photos" type="file" accept="image/*" multiple class="mt-2"><p class="text-xs text-[#958477] mt-1">Choose clear photos. You can select multiple images.</p><div id="photo-preview" class="flex flex-wrap gap-2 mt-3"></div></div>
+  <div class="flex justify-between items-center mt-7"><p class="font-bold text-xl" id="modal-price"></p><button class="btn" onclick="addToCart()">Add to cart</button></div>
+</div></div>
+
+<!-- Cart / checkout -->
+<div id="cart-modal" class="modal" onclick="if(event.target===this)closeCart()"><div class="modalbox">
+  <div class="flex justify-between items-center"><h3 class="serif text-3xl">Your cart</h3><button onclick="closeCart()" class="text-2xl">×</button></div>
+  <div id="cart-items" class="space-y-3 mt-5"></div>
+  <div class="border-t border-[#e5d9ce] mt-5 pt-4 flex justify-between text-lg font-bold"><span>Subtotal</span><span id="cart-total">₹0</span></div>
+  <p class="text-xs text-[#958477] mt-2">Delivery charges, if applicable, will be confirmed by our team on WhatsApp.</p>
+  <div class="mt-7 grid md:grid-cols-2 gap-4"><div><h4 class="font-bold mb-3">Delivery details</h4><div class="space-y-3"><input id="checkout-name" placeholder="Full name" required><input id="checkout-phone" placeholder="WhatsApp mobile number" required><input id="checkout-city" placeholder="City" required><textarea id="checkout-address" rows="3" placeholder="Full delivery address" required></textarea></div></div>
+  <div class="soft rounded-2xl p-5"><h4 class="font-bold">Order summary</h4><p class="text-sm text-[#87766a] mt-2">After you place the order, PICNEST will receive your order details on WhatsApp. We will share the payment QR/details with you.</p><button id="place-order-btn" class="btn w-full mt-5" onclick="placeOrder()">Place order & WhatsApp receipt</button><p class="text-[11px] text-[#958477] mt-3">No online payment is collected on this website.</p></div></div>
+</div></div>
+
+<!-- Order confirmation -->
+<div id="success-modal" class="modal"><div class="modalbox max-w-lg text-center"><div class="w-16 h-16 rounded-full bg-[#e8eee4] text-[#54734c] grid place-items-center text-3xl mx-auto">✓</div><h3 class="serif text-3xl mt-4">Order received!</h3><p class="text-sm text-[#87766a] mt-2">Your order details are saved. WhatsApp will open with your receipt for PICNEST.</p><div id="order-receipt" class="text-left bg-white border border-[#eee4da] rounded-2xl p-4 mt-5 text-sm"></div><button class="btn w-full mt-5" onclick="closeSuccess()">Continue shopping</button></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://euthspxgyrhtmsdswaoa.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wiW6ZFMiOfU7KMRXiDie2g_aCNluimz';
+const PHOTO_BUCKET = 'picnest-photos';
+const ADMIN_WHATSAPP = '918681801077';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const fallbackProducts = [
+ {id:'magnet-set',name:'Fridge Magnets',category:'magnets',price:399,badge:'Customer favourite',description:'Turn favourite photos into glossy keepsakes for your fridge, locker or workspace.',image_url:'https://images.unsplash.com/photo-1513519538248-9e3b3e7b4c5c?auto=format&fit=crop&w=1000&q=85',stock_qty:999},
+ {id:'photo-prints',name:'Customized Photo Prints',category:'prints',price:299,badge:'Bestseller',description:'Premium photo prints with rich colours and beautiful detail. Add your preferred size and finish.',image_url:'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=85',stock_qty:999},
+ {id:'event-magnets',name:'Live Event Photo Magnets',category:'events',price:549,badge:'For celebrations',description:'On-the-spot personalised photo magnets for weddings, birthdays and special gatherings.',image_url:'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000&q=85',stock_qty:999},
+ {id:'photo-booth',name:'Live Photo Printing Booth',category:'events',price:14999,badge:'Event package',description:'A memorable photo booth experience with instant prints for your guests. Final quote depends on event details.',image_url:'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=85',stock_qty:999},
+ {id:'polaroids',name:'Polaroid Prints',category:'polaroids',price:349,badge:'Most loved',description:'Retro-style photo prints with a clean white border and optional custom captions.',image_url:'https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ea?auto=format&fit=crop&w=1000&q=85',stock_qty:999}
+];
+let products=[],cart=[],selectedProduct=null,selectedFiles=[],activeCategory='all';
+
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',3000)}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeProduct(){document.getElementById('product-modal').classList.remove('show')}
+function closeCart(){document.getElementById('cart-modal').classList.remove('show')}
+function closeSuccess(){document.getElementById('success-modal').classList.remove('show')}
+async function loadProducts(){
+ const {data,error}=await db.from('picnest_products').select('id,name,category,description,price,stock_qty,badge,image_url,is_active').eq('is_active',true).order('created_at',{ascending:true});
+ if(!error && Array.isArray(data) && data.length){products=data;document.getElementById('catalog-note').textContent='Prices and availability are managed by PICNEST.'}
+ else {products=fallbackProducts;document.getElementById('catalog-note').textContent='Showing the starter catalogue. Connect the picnest_products table in Supabase to manage prices and stock from the admin dashboard.';if(error)console.warn('Product table not available:',error.message)}
+ renderProducts();
+}
+function renderProducts(){
+ const list=products.filter(p=>activeCategory==='all'||p.category===activeCategory);
+ document.getElementById('product-grid').innerHTML=list.map(p=>{
+  const out=Number(p.stock_qty??0)<=0;
+  return `<article class="card flex flex-col"><div class="relative"><img class="w-full h-48 object-cover" src="${safe(p.image_url||'')}" alt="${safe(p.name)}" onerror="this.src='https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ea?auto=format&fit=crop&w=900&q=80'"><span class="absolute top-3 left-3 bg-white/90 rounded-full px-3 py-1 text-[10px] font-bold">${safe(p.badge||'PICNEST')}</span>${out?'<span class="absolute top-3 right-3 bg-[#30251f] text-white rounded-full px-3 py-1 text-[10px]">Sold out</span>':''}</div><div class="p-4 flex flex-col flex-1"><h3 class="serif text-xl">${safe(p.name)}</h3><p class="text-xs text-[#87766a] leading-5 mt-2 flex-1">${safe(p.description||'Made with care by PICNEST.')}</p><div class="flex items-center justify-between mt-4"><b class="text-lg">${money(p.price)}</b><button class="btn text-xs" ${out?'disabled':''} onclick="openProduct('${safe(p.id)}')">${out?'Unavailable':'Customise'}</button></div><p class="text-[10px] text-[#9a887b] mt-2">${Number(p.stock_qty??0)>0&&Number(p.stock_qty)<999?'In stock: '+Number(p.stock_qty):''}</p></div></article>`;
+ }).join('')||'<p class="col-span-full text-center py-12 text-[#87766a]">No products in this category yet.</p>';
+}
+document.getElementById('categories').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(!b)return;activeCategory=b.dataset.cat;document.querySelectorAll('[data-cat]').forEach(x=>x.classList.toggle('active',x===b));renderProducts()});
+function openProduct(id){
+ selectedProduct=products.find(p=>p.id===id);if(!selectedProduct)return;selectedFiles=[];
+ document.getElementById('modal-title').textContent=selectedProduct.name;document.getElementById('modal-desc').textContent=selectedProduct.description||'Personalise your PICNEST order.';
+ document.getElementById('modal-qty').value=1;document.getElementById('modal-qty').max=Number(selectedProduct.stock_qty??999);document.getElementById('modal-notes').value='';document.getElementById('modal-photos').value='';document.getElementById('photo-preview').innerHTML='';document.getElementById('modal-price').textContent=money(selectedProduct.price)+' each';openModal('product-modal');
+}
+document.getElementById('modal-photos').addEventListener('change',e=>{
+ selectedFiles=Array.from(e.target.files||[]);document.getElementById('photo-preview').innerHTML='';
+ selectedFiles.forEach(f=>{if(!f.type.startsWith('image/'))return;const img=document.createElement('img');img.className='photo-thumb';img.src=URL.createObjectURL(f);img.alt='Photo preview';document.getElementById('photo-preview').appendChild(img)});
+});
+function addToCart(){
+ const qty=Math.max(1,Math.floor(Number(document.getElementById('modal-qty').value)||1));
+ const stock=Number(selectedProduct.stock_qty??999);
+ if(qty>stock){toast('Only '+stock+' item(s) currently available.');return}
+ const files=selectedFiles.slice();
+ cart.push({cartId:crypto.randomUUID(),product_id:selectedProduct.id,name:selectedProduct.name,unit_price:Number(selectedProduct.price),quantity:qty,notes:document.getElementById('modal-notes').value.trim(),files});
+ closeProduct();renderCart();toast('Added to your cart');
+}
+function removeCartItem(id){cart=cart.filter(x=>x.cartId!==id);renderCart()}
+function renderCart(){
+ document.getElementById('cart-count').textContent=cart.reduce((s,x)=>s+x.quantity,0);
+ document.getElementById('cart-items').innerHTML=cart.map(x=>`<div class="bg-white border border-[#eee4da] rounded-xl p-3 flex justify-between gap-3"><div><b>${safe(x.name)} × ${x.quantity}</b><p class="text-xs text-[#87766a] mt-1">${x.files.length} photo(s) ${x.notes?'• '+safe(x.notes):''}</p></div><div class="text-right whitespace-nowrap"><b>${money(x.unit_price*x.quantity)}</b><button onclick="removeCartItem('${x.cartId}')" class="block text-xs text-rose-700 underline ml-auto mt-2">Remove</button></div></div>`).join('')||'<p class="text-sm text-[#87766a] py-5">Your cart is empty. Explore the collection to add a keepsake.</p>';
+ document.getElementById('cart-total').textContent=money(cart.reduce((s,x)=>s+x.unit_price*x.quantity,0));
+}
+function openCart(){renderCart();openModal('cart-modal')}
+function buildReceipt(orderId,name,phone,address,items,total){
+ const lines=items.map(x=>`• ${x.name} x ${x.quantity} — ${money(x.unit_price*x.quantity)}`).join('\n');
+ return `PICNEST ORDER\nOrder ID: ${orderId}\nName: ${name}\nWhatsApp: ${phone}\nDelivery: ${address}\n\n${lines}\n\nTotal: ${money(total)}\nPayment: Pending\nPlease share payment QR/details with the customer.`;
+}
+async function placeOrder(){
+ if(!cart.length){toast('Your cart is empty.');return}
+ const name=document.getElementById('checkout-name').value.trim(),phone=document.getElementById('checkout-phone').value.trim(),city=document.getElementById('checkout-city').value.trim(),address=document.getElementById('checkout-address').value.trim();
+ if(!name||!phone||!city||!address){toast('Please complete all delivery details.');return}
+ if(!/^[0-9+\-\s()]{8,18}$/.test(phone)){toast('Please enter a valid mobile number.');return}
+ const btn=document.getElementById('place-order-btn');btn.disabled=true;btn.textContent='Placing order…';
+ try{
+  // Refresh catalogue prices and stock immediately before accepting the order.
+  const ids=[...new Set(cart.map(x=>x.product_id))];
+  const {data:latest,error:refreshError}=await db.from('picnest_products').select('id,name,price,stock_qty,is_active').in('id',ids);
+  if(!refreshError&&latest){
+   for(const item of cart){const p=latest.find(z=>z.id===item.product_id);if(!p||!p.is_active)throw new Error(item.name+' is no longer available.');if(Number(p.stock_qty)<item.quantity)throw new Error('Insufficient stock for '+item.name+'.');item.unit_price=Number(p.price);item.name=p.name}
+  }
+  const orderId='PN-'+Date.now().toString(36).toUpperCase();
+  const orderItems=[];
+  for(const item of cart){
+   const paths=[];
+   for(let i=0;i<item.files.length;i++){
+    const file=item.files[i];if(!file.type.startsWith('image/'))continue;
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const path=`orders/${orderId}/${item.cartId}/${i+1}-${crypto.randomUUID()}.${ext}`;
+    const {error:uploadError}=await db.storage.from(PHOTO_BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError)throw new Error('Photo upload failed: '+uploadError.message);
+    paths.push(path);
+   }
+   orderItems.push({product_id:item.product_id,name:item.name,unit_price:item.unit_price,quantity:item.quantity,line_total:item.unit_price*item.quantity,notes:item.notes,photo_paths:paths});
+  }
+  const total=orderItems.reduce((s,x)=>s+x.line_total,0);
+  const deliveryAddress=city+', '+address;
+  const payload={id:orderId,user_id:null,customer_name:name,customer_phone:phone,delivery_address:deliveryAddress,items:orderItems,total,status:'New',payment_status:'Pending'};
+  const {error:insertError}=await db.from('picnest_orders').insert(payload);
+  if(insertError)throw new Error('Could not save order: '+insertError.message);
+  const receipt=buildReceipt(orderId,name,phone,deliveryAddress,orderItems,total);
+  document.getElementById('order-receipt').innerHTML=`<p><b>Order ID:</b> ${safe(orderId)}</p><p class="mt-1"><b>Name:</b> ${safe(name)}</p><p class="mt-1"><b>Delivery:</b> ${safe(deliveryAddress)}</p><div class="border-t my-3 pt-3">${orderItems.map(x=>`<p>${safe(x.name)} × ${x.quantity} — ${money(x.line_total)}</p>`).join('')}</div><p class="font-bold text-lg">Total: ${money(total)}</p><p class="text-xs text-[#87766a] mt-2">Payment status: Pending</p>`;
+  cart=[];renderCart();closeCart();openModal('success-modal');
+  const wa='https://wa.me/'+ADMIN_WHATSAPP+'?text='+encodeURIComponent(receipt);
+  window.open(wa,'_blank','noopener');
+ }catch(err){console.error(err);toast(err.message||'Something went wrong. Please try again.')}
+ finally{btn.disabled=false;btn.textContent='Place order & WhatsApp receipt'}
+}
+document.getElementById('event-form').addEventListener('submit',async e=>{
+ e.preventDefault();const f=e.currentTarget,fd=new FormData(f);const details=Object.fromEntries(fd.entries());
+ try{
+  const {error}=await db.from('picnest_events').insert({name:details.name,phone:details.phone,event_type:details.event_type,event_date:details.event_date||null,city_venue:details.city_venue,notes:details.notes});
+  if(error)throw error;
+  const msg=`PICNEST EVENT ENQUIRY\nName: ${details.name}\nPhone: ${details.phone}\nEvent: ${details.event_type}\nDate: ${details.event_date||'Not specified'}\nVenue: ${details.city_venue||'Not specified'}\nDetails: ${details.notes||'—'}`;
+  window.open('https://wa.me/'+ADMIN_WHATSAPP+'?text='+encodeURIComponent(msg),'_blank','noopener');f.reset();toast('Enquiry submitted. WhatsApp is opening.');
+ }catch(err){console.error(err);toast('Could not submit enquiry: '+(err.message||'Please try again.'))}
+});
+document.getElementById('year').textContent=new Date().getFullYear();
+loadProducts();
+</script>
+</body>
+</html>
