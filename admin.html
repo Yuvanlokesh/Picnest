@@ -1,7 +1,28 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PICNEST Admin</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 :root{--ink:#211c19;--gold:#b58a4b;--cream:#fbf8f2;--line:#e9dfd1;--muted:#766b62}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,Arial}.bar{background:#211c19;color:#fff;padding:20px 5vw;display:flex;justify-content:space-between;align-items:center}.brand{font:25px Georgia,serif;letter-spacing:.15em}.wrap{max-width:1200px;margin:35px auto;padding:0 20px}.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:20px}.login{max-width:450px;margin:8vh auto}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:.17em;font-weight:800}.h{font:32px Georgia,serif;margin:9px 0 18px}.field{margin:13px 0}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px}.btn{border:0;border-radius:999px;background:var(--ink);color:#fff;padding:11px 17px;font-weight:700;cursor:pointer}.btn.gold{background:var(--gold)}.btn.light{background:#f1e8dc;color:var(--ink)}.tabs{display:flex;gap:8px;margin:20px 0}.tab{border:1px solid var(--line);background:#fff;padding:10px 16px;border-radius:999px;cursor:pointer}.tab.active{background:var(--ink);color:white}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.stat{background:#f7f1e8;border-radius:14px;padding:18px}.stat b{font:28px Georgia,serif;display:block;margin-top:7px}.order{border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}.row{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px;line-height:1.5}.pill{display:inline-block;background:#f1e8dc;border-radius:30px;padding:5px 10px;font-size:11px;margin:3px}.select{padding:9px;border:1px solid var(--line);border-radius:9px;background:white}.hidden{display:none!important}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#211c19;color:white;padding:13px 18px;border-radius:12px;display:none;max-width:90%}.toast.show{display:block}a{color:#946d35}@media(max-width:650px){.stats{grid-template-columns:1fr}.bar{padding:16px 20px}.h{font-size:27px}}
 </style></head><body><header class="bar"><div class="brand">PICNEST <span style="font:11px Inter,sans-serif;letter-spacing:.12em;color:#d5b783">ADMIN</span></div><button class="btn light hidden" id="logout" onclick="logout()">Sign out</button></header>
-<div class="wrap"><section id="loginBox" class="panel login"><div class="eyebrow">PRIVATE ADMIN ACCESS</div><h1 class="h">Sign in securely</h1><p class="muted">Admin access is restricted to the phone number added to the PICNEST admin allowlist. No email or password.</p><div id="phoneBox"><div class="field"><label>Admin mobile number</label><input id="phone" type="tel" placeholder="+91 98765 43210"></div><button class="btn gold" style="width:100%" onclick="sendOtp()">Send OTP</button></div><div id="otpBox" class="hidden"><div class="field"><label>Verification code</label><input id="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP"></div><button class="btn gold" style="width:100%" onclick="verifyOtp()">Verify and open dashboard</button><p class="muted"><a href="#" onclick="back();return false">Change phone number</a></p></div><p class="muted" style="margin-top:18px">If you are not on the admin allowlist, access will be denied even if your phone is verified.</p></section>
+<div class="wrap"><section id="loginBox" <section id="loginBox" class="panel login">
+  <div class="eyebrow">PRIVATE ADMIN ACCESS</div>
+  <h1 class="h">Admin Sign In</h1>
+  <p class="muted">Sign in using your authorised PICNEST admin email.</p>
+
+  <div class="field">
+    <label>Admin Email</label>
+    <input id="adminEmail" type="email"
+      placeholder="Enter admin email" autocomplete="username">
+  </div>
+
+  <div class="field">
+    <label>Password</label>
+    <input id="adminPassword" type="password"
+      placeholder="Enter password" autocomplete="current-password">
+  </div>
+
+  <button class="btn gold" style="width:100%"
+    onclick="adminLogin()">
+    Sign In
+  </button>
+</section>
 <section id="dashboard" class="hidden"><div class="row" style="align-items:end"><div><div class="eyebrow">STORE OVERVIEW</div><h1 class="h">Orders & enquiries</h1><p class="muted">Private PICNEST operations dashboard.</p></div><button class="btn gold" onclick="loadData()">Refresh</button></div><div class="stats"><div class="stat">Total orders<b id="sOrders">0</b></div><div class="stat">Pending payment<b id="sPending">0</b></div><div class="stat">Event enquiries<b id="sEvents">0</b></div></div><div class="tabs"><button class="tab active" onclick="showTab('orders',this)">Orders</button><button class="tab" onclick="showTab('events',this)">Event enquiries</button></div><div id="ordersPanel" class="panel"><div class="row"><h2 class="h" style="font-size:25px">Customer orders</h2><span class="muted">Newest first</span></div><div id="orders"></div></div><div id="eventsPanel" class="panel hidden"><h2 class="h" style="font-size:25px">Event enquiries</h2><div id="events"></div></div></section></div><div class="toast" id="toast"></div>
 <script>
 // Must match the Supabase URL and publishable/anon key in index.html.
